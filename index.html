@@ -212,7 +212,7 @@
         <div id="tabContentLesson">
             <div class="lesson-card">
                 <h4 id="lessonTitle" style="color: #60a5fa; margin-bottom: 10px;">Cargando bloque...</h4>
-                <div id="lessonBody" style="color: #cbd5e1; font-size: 1rem; white-space: pre-line;"></div>
+                <div id="lessonBody" style="color: #cbd5e1; font-size: 1rem;"></div>
             </div>
             <button id="btnCompleteMission" onclick="completeMission()">Entendí e integré el concepto de hoy (+10 XP)</button>
         </div>
@@ -243,24 +243,6 @@
 </div>
 
 <script>
-    // --- TEMARIO INTEGRADO: BLOQUES DE ESTUDIO B1 -> C1 (24 SEMANAS / 180 DÍAS) ---
-    const syllabus = {
-        lessons: [
-            "**SEMANA 1 (Días 1-7): Desautomatización del error y Upgrade Léxico (Extreme Adjectives)**\nExplicación: Para sonar C1 debes erradicar modificadores planos como 'very'. Reemplazamos estructuras básicas por adjetivos extremos que cargan el énfasis de forma natural.\n\n*Concepto del día:* En lugar de decir 'The meeting was very long and I am very tired', un hablante avanzado opta por: 'The meeting was incredibly tedious and I am utterly shattered'. El uso de intensificadores exactos es clave.",
-            "**SEMANA 2 (Días 8-14): Dominio Narrativo de Precisión (Past Perfect Continuous)**\nExplicación: En el nivel B1 se abusa del Pasado Simple. Para escalar, usamos el Past Perfect Continuous para dar un trasfondo claro a situaciones profesionales pasadas.\n\n*Concepto del día:* Estructura: Had + been + verbo-ing. Úsalo para conectar una acción que estuvo ocurriendo de forma continua antes de otro evento clave en el pasado. Ejemplo: 'We had been analyzing the market anomalies for weeks before the actual crash occurred'.",
-            "**SEMANA 3 (Días 15-21): Sintaxis Avanzada y Énfasis (Inversión Gramatical)**\nExplicación: Cambiar el orden de las palabras altera el peso dramático y profesional de tus discursos. La inversión gramatical mueve un adverbio limitante u negativo al frente e invierte el auxiliar con el sujeto.\n\n*Concepto del día:* Al empezar con 'Rarely', 'Seldom' o 'Under no circumstances', la oración adopta forma de pregunta. Cambia 'We rarely witness such growth' por: 'Rarely do we witness such remarkable growth'.",
-            "**SEMANA 4 (Días 22-28): Estructuras de Aislamiento Lineal (Cleft Sentences)**\nExplicación: Las oraciones hendidas ('Cleft sentences') sirven para dirigir la atención del oyente exactamente hacia la pieza de información que quieres destacar en una negociación o reporte.\n\n*Concepto del día:* Usa la estructura 'What + oración + is/was'. Transforma una idea lineal como 'We need financial security' en un argumento contundente: 'What we genuinely require at this critical juncture is ironclad financial security'.",
-            "**SEMANA 5 (Días 29-35): Lenguaje Diplomático Avanzado (Hedging Corporativo)**\nExplicación: En entornos de alto nivel o redacción periodística, afirmar verdades absolutas puede sonar agresivo o poco riguroso. El 'Hedging' es el arte de matizar utilizando verbos modales y de apariencia.\n\n*Concepto del día:* Usa fórmulas de distanciamiento analítico. En vez de 'This strategy is wrong', utiliza estructuras C1: 'It would appear that the strategy is slightly flawed, which could potentially jeopardize the quarterly results'."
-        ],
-        phrases: [
-            "The geopolitical climate is changing and analysts are utterly shattered",
-            "We had been evaluating the technical architecture long before the system upgrade",
-            "Rarely do we witness such an unprecedented surge in macroeconomic data",
-            "What matters most to our editorial board is the absolute integrity of our sources",
-            "It appears that the current digital strategy is flawed which could potentially jeopardize efficiency"
-        ]
-    };
-
     // --- ESTADO INICIAL COMPATIBLE CON LOCALSTORAGE ---
     let userState = {
         currentDay: 1,
@@ -278,14 +260,74 @@
     };
 
     function renderScreen() {
-        let currentWeekNum = Math.floor((userState.currentDay - 1) / 7) + 1;
+        // Validar que la base de datos externa 'coreProgram' cargó correctamente
+        if (typeof coreProgram === 'undefined' || !coreProgram[userState.currentDay]) {
+            document.getElementById('lessonTitle').innerHTML = "📖 Fin del Módulo";
+            document.getElementById('lessonBody').innerHTML = "¡Felicidades! Has completado todas las lecciones disponibles.";
+            return;
+        }
+
+        const dayData = coreProgram[userState.currentDay];
+        let weekNum = Math.ceil(userState.currentDay / 7);
+
+        // Actualizar estadísticas superiores
+        document.getElementById('statWeek').textContent = `Semana ${weekNum}`;
+        document.getElementById('statDay').textContent = `${userState.currentDay} / 180`;
+        document.getElementById('statStreak').textContent = `${userState.streak} 🔥`;
+        document.getElementById('statXP').textContent = userState.xp;
+
+        // Inyectar el formato avanzado y estético dentro de la pestaña de estudio
+        document.getElementById('lessonTitle').innerHTML = `📖 Bloque de Estudio Técnico: Día ${userState.currentDay}`;
         
-        document.getElementById('statWeek').innerText = `Semana ${currentWeekNum}`;
-        document.getElementById('statDay').innerText = `${userState.currentDay} / 180`;
-        document.getElementById('statStreak').innerText = userState.streak + " 🔥";
-        document.getElementById('statXP').innerText = userState.xp;
-        
-        setupDashboard(currentWeekNum);
+        document.getElementById('lessonBody').innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <strong style="color: #f59e0b; font-size: 1.1rem;">🎯 Módulo: ${dayData.title}</strong>
+            </div>
+            <p style="color: #cbd5e1; line-height: 1.6; text-align: justify; margin-bottom: 20px;">${dayData.explanation}</p>
+            
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 14px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #ef4444;">
+                <strong style="color: #ef4444;">Estructura B1 (Inercia común):</strong><br>
+                <span style="font-style: italic; color: #f87171;">"${dayData.b1}"</span>
+            </div>
+            
+            <div style="background: rgba(16, 185, 129, 0.15); padding: 14px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+                <strong style="color: #10b981;">Evolución C1 (Fluidez natural):</strong><br>
+                <span style="font-weight: bold; color: #34d399;">"${dayData.c1}"</span>
+            </div>
+            
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 14px; border-radius: 8px; border: 1px dashed #60a5fa; margin-top: 15px;">
+                <strong style="color: #60a5fa;">🎯 Reto de Inmersión Diaria:</strong><br>
+                <span style="color: #93c5fd;">${dayData.instruction}</span>
+            </div>
+        `;
+
+        // Actualizar la pestaña de voz con la frase C1 del día
+        document.getElementById('phraseToPronounce').innerText = dayData.c1;
+
+        // Estado del botón de completar misión
+        let btnM = document.getElementById('btnCompleteMission');
+        if (userState.completedMissionToday) {
+            btnM.innerText = "Lección completada hoy ✓";
+            btnM.disabled = true;
+            btnM.style.background = "var(--success)";
+        } else {
+            btnM.innerText = "Entendí e integré el concepto de hoy (+10 XP)";
+            btnM.disabled = false;
+            btnM.style.background = "var(--primary)";
+        }
+
+        // Estado del área de feedback por voz
+        let feed = document.getElementById('voiceFeedback');
+        let mic = document.getElementById('btnListenMic');
+        if (userState.completedVoiceToday) {
+            feed.className = "feedback correct";
+            feed.innerText = "¡Audio emparejado perfectamente con el registro C1! Reto superado.";
+            feed.classList.remove('hidden');
+            mic.disabled = true;
+        } else {
+            feed.classList.add('hidden');
+            mic.disabled = false;
+        }
     }
 
     function switchTab(tab) {
@@ -299,41 +341,6 @@
             document.getElementById('tabContentPractice').classList.remove('hidden');
             document.getElementById('tabBtnLesson').classList.remove('active');
             document.getElementById('tabBtnPractice').classList.add('active');
-        }
-    }
-
-    function setupDashboard(weekNum) {
-        // Enrutamiento seguro para que el contenido se repita de forma cíclica si pasa de las semanas cargadas en la maqueta
-        let lessonIndex = (weekNum - 1) % syllabus.lessons.length;
-        let phraseIndex = (userState.currentDay - 1) % syllabus.phrases.length;
-
-        document.getElementById('lessonTitle').innerHTML = `📖 Bloque de Estudio Técnico: Día ${userState.currentDay}`;
-        document.getElementById('lessonBody').innerText = syllabus.lessons[lessonIndex];
-        
-        let btnM = document.getElementById('btnCompleteMission');
-        if(userState.completedMissionToday) {
-            btnM.innerText = "Lección completada hoy ✓";
-            btnM.disabled = true;
-            btnM.style.background = "var(--success)";
-        } else {
-            btnM.innerText = "Entendí e integré el concepto de hoy (+10 XP)";
-            btnM.disabled = false;
-            btnM.style.background = "var(--primary)";
-        }
-
-        let currentPhrase = syllabus.phrases[phraseIndex];
-        document.getElementById('phraseToPronounce').innerText = currentPhrase;
-
-        let feed = document.getElementById('voiceFeedback');
-        let mic = document.getElementById('btnListenMic');
-        if(userState.completedVoiceToday) {
-            feed.className = "feedback correct";
-            feed.innerText = "¡Audio emparejado perfectamente con el registro C1! Reto superado.";
-            feed.classList.remove('hidden');
-            mic.disabled = true;
-        } else {
-            feed.classList.add('hidden');
-            mic.disabled = false;
         }
     }
 
@@ -357,7 +364,7 @@
         
         if(!recognition) {
             recognition = new SpeechReg();
-            recognition.lang = 'en-US'; // Evaluar estrictamente fonemas angloparlantes
+            recognition.lang = 'en-US';
             
             recognition.onstart = () => {
                 isListening = true;
@@ -371,8 +378,7 @@
             };
             recognition.onresult = (e) => {
                 let textSpoken = e.results[0][0].transcript.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
-                let phraseIndex = (userState.currentDay - 1) % syllabus.phrases.length;
-                let target = syllabus.phrases[phraseIndex].toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
+                const target = coreProgram[userState.currentDay].c1.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
                 
                 let feed = document.getElementById('voiceFeedback');
                 feed.classList.remove('hidden');
@@ -401,6 +407,7 @@
         if(saved) userState = JSON.parse(saved);
     }
 
+    // Control de paso del tiempo real
     function checkDayTransition() {
         let today = new Date().toDateString();
         if(userState.lastActiveDate && userState.lastActiveDate !== today) {
@@ -428,7 +435,7 @@
         renderScreen();
     }
 
-    // --- RESPALDOS DE SEGURIDAD (ANTI-BORRADO DE CACHÉ) ---
+    // --- RESPALDOS DE SEGURIDAD ---
     function exportProgress() {
         let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userState));
         let downloadAnchor = document.createElement('a');
@@ -459,6 +466,7 @@
         reader.readAsText(file);
     }
 
+    // Resetear app por completo
     function resetApp() {
         if(confirm("¿Estás completamente seguro de que deseas reiniciar tu progreso desde el Día 1?")) {
             localStorage.removeItem('c1_coach_progress');
@@ -466,7 +474,8 @@
         }
     }
 </script>
-    <!-- CARGA DEL BANCO DE DATOS EXTENDIDO -->
+
+<!-- CARGA DEL BANCO DE DATOS EXTENDIDO -->
 <script src="program_content.js"></script>
 </body>
 </html>
